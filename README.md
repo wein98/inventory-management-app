@@ -44,6 +44,10 @@ $ npm run start:dev
 # production mode
 $ npm run start:prod
 ```
+```
+# localhost url to swagger documentation
+http://localhost:3000/api/inventory/#/
+```
 
 ## Test
 
