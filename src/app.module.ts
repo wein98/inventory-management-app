@@ -1,8 +1,9 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ApiModule } from './api';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
+import { Product } from './entity';
+// import { AppController } from './app.controller';
+// import { AppService } from './app.service';
 
 @Module({
   imports: [TypeOrmModule.forRoot({
@@ -13,10 +14,10 @@ import { AppService } from './app.service';
     // username: DB_USERNAME,
     username: "root",
     // password: DB_PASSWORD,
-    password: "password123",
+    password: "ilikenoone",
     // database: DB_NAME,
-    database: "inventory-mangement",
-    entities: [],
+    database: "inventory-management",
+    entities: [ Product ],
     subscribers: [],
     synchronize: true,
   }),

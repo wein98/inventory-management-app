@@ -14,9 +14,22 @@ import {
   Req,
 } from "@nestjs/common";
 import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOkResponse, ApiQuery, ApiTags } from "@nestjs/swagger";
+import { CreatePrductDto } from "../dto/product.dto";
 
-@ApiTags("User")
+@ApiTags("Product")
 @Controller("/api/product")
-export class ProductController{
+export class ProductController {
   constructor() {}
+
+  @Post('/:productId')
+  async getProductById(@Param("productId") productId: string) {
+
+    console.log('ok');
+  }
+
+  @Post('')
+  async postProduct(@Body() body: CreatePrductDto) {
+
+    console.log('ok');
+  }
 }
