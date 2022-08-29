@@ -1,21 +1,56 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { IsEmail, IsNotEmpty, IsOptional } from "class-validator";
+import { PRODUCT_CATEGORY } from "src/entity/product.entity";
 
-export class CreatePrductDto {
-  @IsNotEmpty()
+export class ProductDto {
+  readonly id: string;
+  readonly name: string;
+  readonly product_code: number;
+  readonly category: string;
+  readonly workmanship: number;
+  readonly SKU: string;
+}
+
+export class CreateProductDto {
   @ApiProperty()
-  readonly product_code: string;
+  readonly name: string;
   
   @IsNotEmpty()
   @ApiProperty()
+  readonly product_code: number;
+  
+  @IsNotEmpty()
+  @ApiProperty({ enum: PRODUCT_CATEGORY })
   readonly category: string;
 
+  @IsNotEmpty()
+  @ApiProperty()
+  readonly workmanship: number;
+
+  @IsNotEmpty()
+  @ApiProperty()
+  readonly SKU: string;
+}
+
+export class CreateProductVariationDto {
   @IsNotEmpty()
   @ApiProperty()
   readonly weight: number;
 
   @ApiProperty()
   readonly length: number;
+  
+  @IsNotEmpty()
+  @ApiProperty()
+  readonly parentProductId: number;
+
+  @IsNotEmpty()
+  @ApiProperty()
+  readonly purchaseDate: Date;
+
+  @IsNotEmpty()
+  @ApiProperty()
+  readonly productCode: number;
 
   @IsNotEmpty()
   @ApiProperty()

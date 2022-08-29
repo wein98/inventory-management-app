@@ -1,10 +1,11 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, OneToMany, OneToOne, JoinTable, JoinColumn, BeforeInsert, BeforeUpdate } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, OneToMany, OneToOne, JoinTable, JoinColumn, BeforeInsert, BeforeUpdate, ManyToOne } from 'typeorm';
+import { ProductVariation } from './product-variation.entity';
 
 export enum PRODUCT_CATEGORY {
-  NECKLACE = 'necklace',
-  BRACELET = 'bracelet',
-  RING = 'ring',
-  EARRING = 'earring'
+  NECKLACE = 'NECKLACE',
+  BRACELET = 'BRACELET',
+  RING = 'RING',
+  EARRING = 'EARRING'
 }
 
 @Entity('products')
@@ -12,18 +13,27 @@ export class Product {
   @PrimaryGeneratedColumn("uuid")
   id: string;
 
+  @Column({ default: '' })
+  name: string;
+
   @Column({ type: 'enum', enum: PRODUCT_CATEGORY})
   category: PRODUCT_CATEGORY;
-  
-  @Column({ default: 0 })
-  weight: number;
 
   @Column({ default: 0 })
-  length: number;
+  workmanship: number;
 
   @Column({ unique: true, default: '' })
   SKU: string;
 
   @Column({ unique: true })
-  product_code: string;
+  product_code: number;
+
+  @OneToMany(() => ProductVariation, productVariation => productVariation.parent)
+  product_variations: ProductVariation[];
+
+  @CreateDateColumn()
+  createdAt: Date;
+
+  @UpdateDateColumn()
+  updatedAt: Date;
 }
