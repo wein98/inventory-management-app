@@ -13,13 +13,24 @@ import {
   NotFoundException,
   Req,
   ConflictException,
+  UploadedFiles,
+  BadRequestException,
 } from "@nestjs/common";
+import { FileInterceptor, FilesInterceptor } from "@nestjs/platform-express";
 import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOkResponse, ApiQuery, ApiTags } from "@nestjs/swagger";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Product, ProductVariation } from "src/entity";
 import { Pagination } from "src/util/apiPaginatedDto";
 import { Repository } from "typeorm";
 import { CreateProductDto, CreateProductVariationDto, ProductDto } from "../dto/product.dto";
+var csv = require("csvtojson");
+
+export const imageFileFilter = (req:any, file:any, callback:any) => {
+  if (!file.originalname.match(/\.(csv)$/)) {
+    return callback(new Error('Only csv files are allowed!'), false);
+  }
+  callback(null, true);
+};
 
 @ApiTags("Product")
 @Controller("/api/product")
@@ -31,7 +42,6 @@ export class ProductController {
     private readonly productVariationRepository: Repository<ProductVariation>
   ) {}
   
-
   @Get('variations/:productSKU')
   async getProductVariationsByProductId(@Param("productSKU") productSKU: string) {
     const productVariation = await this.productVariationRepository.findOne({SKU: productSKU});
@@ -114,8 +124,38 @@ export class ProductController {
     }
   }
 
-  // TODO: batch upload
-  // https://stackoverflow.com/questions/71257348/how-do-i-read-an-uploaded-file-text-csv-using-nestjs-and-multer
+  @Post('products/import')
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: "object",
+      properties: {
+        "uploadFile": {
+            type: "file",
+            format: "binary",
+        }
+      },
+      required: ["uploadFile"]
+    }
+  })
+  @ApiOkResponse({ type: Array<Object> })
+  @UseInterceptors(
+    FileInterceptor('uploadFile', {
+      fileFilter: imageFileFilter,
+    }),
+  )
+  async importFile(@Body() body, @UploadedFile() uploadFile: Express.Multer.File) { 
+    try {
+      if (!uploadFile) {
+        throw new BadRequestException('invalid file provided, allowed *.csv single file');
+    }
+      return await csv()
+        .fromString(uploadFile.buffer.toString())
+        .then(jsonObj=>jsonObj)
+    } catch(err) {
+      throw err;
+    }
+  }
+}
 
   // https://blog.minhazav.dev/QR-and-barcode-scanner-using-html-and-javascript/
-}
