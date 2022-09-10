@@ -13,15 +13,14 @@ import {
   NotFoundException,
   Req,
   ConflictException,
-  UploadedFiles,
   BadRequestException,
 } from "@nestjs/common";
-import { FileInterceptor, FilesInterceptor } from "@nestjs/platform-express";
+import { FileInterceptor } from "@nestjs/platform-express";
 import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOkResponse, ApiQuery, ApiTags } from "@nestjs/swagger";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Product, ProductVariation } from "src/entity";
 import { Pagination } from "src/util/apiPaginatedDto";
-import { Repository } from "typeorm";
+import { Like, Repository } from "typeorm";
 import { CreateProductDto, CreateProductVariationDto, ProductDto } from "../dto/product.dto";
 var csv = require("csvtojson");
 
@@ -43,12 +42,27 @@ export class ProductController {
   ) {}
   
   @Get('variations/:productSKU')
-  async getProductVariationsByProductId(@Param("productSKU") productSKU: string) {
-    const productVariation = await this.productVariationRepository.findOne({SKU: productSKU});
-    if(!productVariation){
-      throw new NotFoundException();
-    }
-    return productVariation;
+  @ApiQuery({ name: 'limit', type: 'number', required: false, description: 'default 100'})
+  @ApiQuery({ name: 'offset', type: 'number', required: false, description: 'default 0'})
+  async getProductVariationsByProductId(
+    @Query('limit') limit : number = 100, 
+    @Query('offset') offset: number = 0, 
+    @Param("productSKU") productSKU: string) : Promise<Pagination<any>> {
+    console.log(productSKU);
+    const where = {}
+    where["SKU"] = Like(`%${productSKU}%`)
+    const [ data, total ] = await this.productVariationRepository.findAndCount({
+      where,
+      relations: ['parent'],
+      order: { SKU: 1 },
+      take: limit,
+      skip: offset
+    });
+
+    const pagination : Pagination<any> = {
+      data, total
+  }
+    return pagination;
   }
 
   @Get('')
@@ -156,6 +170,31 @@ export class ProductController {
       throw err;
     }
   }
+
+  // TODO: save products to db
+  // @Post('products/upload')
+  // async postProducts(@Body() body: Array<Object>) {
+  //   // loop through the csv file
+  //   // check parent is null and type 
+  //   if(!body){
+  //     return { message: "Incorrect input."}
+  //   }
+
+  //   body.map(async productObj => {
+  //     // 1. get parent productId
+  //     const product = await this.productVariationRepository.save({
+  //       weight: productObj.weight,
+  //       length: productObj.length,
+  //       size: productObj.size,
+  //       product_code: productObj.product_code,
+  //       size: productObj.size,
+  //       size: productObj.size,
+  //     });
+
+  //     // 2. save product variation with productId relation
+  //   })
+
+  // }
 }
 
   // https://blog.minhazav.dev/QR-and-barcode-scanner-using-html-and-javascript/

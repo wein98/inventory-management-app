@@ -19,6 +19,6 @@ async function bootstrap() {
   const documentInventory = SwaggerModule.createDocument(app, configMobile, { include: [InventoryApiModule]});
   SwaggerModule.setup('api/inventory', app, documentInventory);
 
-  await app.listen(3000);
+  await app.listen(3030);
 }
 bootstrap();

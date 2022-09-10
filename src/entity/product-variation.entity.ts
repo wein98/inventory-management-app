@@ -13,6 +13,9 @@ export class ProductVariation {
   @Column({ default: 0 })
   length: number;
 
+  @Column({ default: 0 })
+  size: number;
+
   @Column({ unique: true, default: '' })
   SKU: string;
 
@@ -22,7 +25,8 @@ export class ProductVariation {
   @Column()
   purchase_date: Date;
 
-  @ManyToOne(() => Product)
+  @ManyToOne(() => Product,product => product.id)
+  @JoinColumn({ name: "product_id" })
   parent: Product; 
 
 //   @ManyToOne(() => Purchase)
