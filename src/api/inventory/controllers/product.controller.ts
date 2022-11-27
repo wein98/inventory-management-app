@@ -15,12 +15,15 @@ import {
   ConflictException,
   BadRequestException,
 } from "@nestjs/common";
+import * as moment from "moment";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOkResponse, ApiQuery, ApiTags } from "@nestjs/swagger";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Product, ProductVariation } from "src/entity";
+import { PRODUCT_CATEGORY } from "src/entity/product.entity";
 import { Pagination } from "src/util/apiPaginatedDto";
 import { Like, Repository } from "typeorm";
+import { moveMessagePortToContext } from "worker_threads";
 import { CreateProductDto, CreateProductVariationDto, ProductDto } from "../dto/product.dto";
 var csv = require("csvtojson");
 
@@ -29,6 +32,24 @@ export const imageFileFilter = (req:any, file:any, callback:any) => {
     return callback(new Error('Only csv files are allowed!'), false);
   }
   callback(null, true);
+};
+
+
+export const getProductCategory = (category) => {
+  switch(category.toLowerCase()) {
+    case 'ring':
+      return PRODUCT_CATEGORY.RING;
+    case 'necklace':
+      return PRODUCT_CATEGORY.NECKLACE;
+    case 'bracelet':
+      return PRODUCT_CATEGORY.BRACELET;
+    case 'earring':
+      return PRODUCT_CATEGORY.EARRING;
+    case 'pendant':
+      return PRODUCT_CATEGORY.PENDANT;
+    default:
+      return ''
+  }
 };
 
 @ApiTags("Product")
@@ -138,34 +159,80 @@ export class ProductController {
     }
   }
 
-  @Post('products/import')
+  @Post('products/import/:productType')
   @ApiConsumes('multipart/form-data')
   @ApiBody({
     schema: {
       type: "object",
       properties: {
-        "uploadFile": {
+        "file": {
             type: "file",
             format: "binary",
         }
       },
-      required: ["uploadFile"]
+      required: ["file"]
     }
   })
   @ApiOkResponse({ type: Array<Object> })
   @UseInterceptors(
-    FileInterceptor('uploadFile', {
+    FileInterceptor('file', {
       fileFilter: imageFileFilter,
     }),
   )
-  async importFile(@Body() body, @UploadedFile() uploadFile: Express.Multer.File) { 
+  async importFile(@Body() body, @UploadedFile() file: Express.Multer.File, @Param("productType") productType: string) { 
     try {
-      if (!uploadFile) {
+      if (!file) {
         throw new BadRequestException('invalid file provided, allowed *.csv single file');
-    }
-      return await csv()
-        .fromString(uploadFile.buffer.toString())
-        .then(jsonObj=>jsonObj)
+      }
+      // convert csv to json 
+      let data = await csv()
+        .fromString(file.buffer.toString())
+        .then(jsonObj=>jsonObj);
+
+      // save parent or children product to db
+      if ( productType === "PARENT" ) {
+        // TODO: check data.type before mapping.
+        let parentProducts = data.map(p => {
+          return {
+            "product_code": p.ID,
+            "SKU": p.SKU,
+            "name": p.Name,
+            "category": getProductCategory(p.Categories),
+          }
+        })
+        console.log(parentProducts);
+        return await this.productRepository.save(parentProducts);
+
+      } else if ( productType === "CHILDREN" ) {
+        let parentProductSKU = null;
+        let childrenProducts = data.map(p => {
+          let parentProduct = null;
+          if (parentProductSKU != p.parent) {
+            parentProductSKU = p.parent
+            parentProduct = this.productRepository.findOne({SKU: p.parent});
+            console.log(parentProduct)
+            if (!parentProduct) {
+              return;
+            }
+          }
+
+          return {
+            "product_code": p.ID,
+            "SKU": p.SKU,
+            "weight": parseFloat(p['Weight (g)']),
+            "length": p['Attribute 2 value(s)'] ? p['Attribute 2 value(s)'] : '',
+            "color": p['Attribute 3 value(s)'] ? p['Attribute 3 value(s)'] : '',
+            "workmanship": p['Regular price'],
+            "parent": parentProduct,
+            "purchase_date": moment().toISOString(),
+            "parentSKU": p.Parent
+          }
+        })
+
+        return await this.productVariationRepository.save(childrenProducts);
+      }
+
+      return data
     } catch(err) {
       throw err;
     }

@@ -7,7 +7,7 @@ export class ProductVariation {
   @PrimaryGeneratedColumn("uuid")
   id: string;
   
-  @Column({ default: 0 })
+  @Column({ nullable: false })
   weight: number;
 
   @Column({ default: 0 })
@@ -16,25 +16,30 @@ export class ProductVariation {
   @Column({ default: 0 })
   size: number;
 
-  @Column({ unique: true, default: '' })
+  @Column({ default: '' })
+  color: string;
+
+  @Column({ unique: true, default: '', nullable: false })
   SKU: string;
 
-  @Column({ unique: true })
-  product_code: number;
+  @Column({ unique: true, nullable: false })
+  product_code: string;
 
   @Column()
   purchase_date: Date;
 
-  @ManyToOne(() => Product,product => product.id)
-  @JoinColumn({ name: "product_id" })
-  parent: Product; 
+  @Column({ default: 0 })
+  workmanship: number;
 
-//   @ManyToOne(() => Purchase)
-//   purchase_date: Product;
+  @ManyToOne(() => Product,product => product.id)
+  @JoinColumn({ name: "parent_id" })
+  parent: Product; 
 
   @CreateDateColumn()
   createdAt: Date;
 
   @UpdateDateColumn()
   updatedAt: Date;
+  
+  parentSKU: String;
 }

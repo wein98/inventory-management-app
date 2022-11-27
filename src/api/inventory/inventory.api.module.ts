@@ -17,7 +17,6 @@ import { Product, ProductVariation, Purchase } from 'src/entity';
     OrderController,
     InventoryController,
     PurchaseController
-  ],
-  providers: [],
+  ]
 })
 export class InventoryApiModule {}

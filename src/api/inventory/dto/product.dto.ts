@@ -5,7 +5,7 @@ import { PRODUCT_CATEGORY } from "src/entity/product.entity";
 export class ProductDto {
   readonly id: string;
   readonly name: string;
-  readonly product_code: number;
+  readonly product_code: string;
   readonly category: string;
   readonly workmanship: number;
   readonly SKU: string;
@@ -42,7 +42,7 @@ export class CreateProductVariationDto {
   
   @IsNotEmpty()
   @ApiProperty()
-  readonly parentProductId: number;
+  readonly parentProductId: string;
 
   @IsNotEmpty()
   @ApiProperty()
@@ -50,7 +50,7 @@ export class CreateProductVariationDto {
 
   @IsNotEmpty()
   @ApiProperty()
-  readonly productCode: number;
+  readonly productCode: string;
 
   @IsNotEmpty()
   @ApiProperty()

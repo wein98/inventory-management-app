@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ApiModule } from './api';
+import { ProductVariationJoinProduct } from './entity/subscribers/product-variation.subscriber';
 import { DB_HOST, DB_NAME, DB_PASSWORD, DB_USERNAME } from './config';
 import { Product, ProductVariation, Purchase } from './entity';
 // import { AppController } from './app.controller';
@@ -15,7 +16,7 @@ import { Product, ProductVariation, Purchase } from './entity';
     password: DB_PASSWORD,
     database: DB_NAME,
     entities: [ Product, ProductVariation, Purchase ],
-    subscribers: [],
+    subscribers: [ ProductVariationJoinProduct ],
     synchronize: true,
   }),
   ApiModule]

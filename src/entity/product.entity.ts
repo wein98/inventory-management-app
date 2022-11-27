@@ -5,7 +5,8 @@ export enum PRODUCT_CATEGORY {
   NECKLACE = 'NECKLACE',
   BRACELET = 'BRACELET',
   RING = 'RING',
-  EARRING = 'EARRING'
+  EARRING = 'EARRING',
+  PENDANT = 'PENDANT',
 }
 
 @Entity('products')
@@ -26,7 +27,7 @@ export class Product {
   SKU: string;
 
   @Column({ unique: true })
-  product_code: number;
+  product_code: string;
 
   @OneToMany(() => ProductVariation, productVariation => productVariation.parent)
   product_variations: ProductVariation[];
