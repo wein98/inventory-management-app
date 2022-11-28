@@ -1,6 +1,9 @@
 import * as dotEnv from "dotenv";
 
-dotEnv.config();
+const { argv } = require('yargs');
+const configPath = argv.env ? `.env.${argv.env}` : null;
+
+dotEnv.config({ path: configPath });
 
 const CONFIG = Object.assign({
         KEEP_LOGS_LAST_DAYS: 180,
