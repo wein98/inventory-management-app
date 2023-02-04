@@ -15,5 +15,7 @@ export const {
     DB_HOST,
     DB_USERNAME,
     DB_PASSWORD,
-    DB_NAME
+    DB_NAME,
+    FIREBASE_API_KEY,
+    FIREBASE_APP_ID
 } = CONFIG;

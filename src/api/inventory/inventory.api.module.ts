@@ -4,19 +4,23 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { OrderController } from './controllers/order.controller';
 import { InventoryController } from './controllers/inventory.controller';
 import { PurchaseController } from './controllers/purchase.controller';
-import { Product, ProductVariation, Purchase } from 'src/entity';
+import { Product, ProductVariation, Purchase, User } from 'src/entity';
+import { AuthController } from './controllers/auth.controller';
+import { AuthModule } from 'src/auth/auth.module';
 
 @Module({
   imports: [TypeOrmModule.forFeature([
     Product,
     ProductVariation,
-    Purchase
-  ])],
+    Purchase,
+    User
+  ]), AuthModule],
   controllers: [
     ProductController, 
     OrderController,
     InventoryController,
-    PurchaseController
+    PurchaseController,
+    AuthController
   ]
 })
 export class InventoryApiModule {}

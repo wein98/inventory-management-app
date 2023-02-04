@@ -25,6 +25,7 @@ import { Pagination } from "src/util/apiPaginatedDto";
 import { Like, Repository } from "typeorm";
 import { moveMessagePortToContext } from "worker_threads";
 import { CreateProductDto, CreateProductVariationDto, ProductDto } from "../dto/product.dto";
+import { AdminAuthGuard } from "src/auth/guards";
 var csv = require("csvtojson");
 
 export const imageFileFilter = (req:any, file:any, callback:any) => {
@@ -86,10 +87,12 @@ export class ProductController {
     return pagination;
   }
 
+  @UseGuards(AdminAuthGuard)
+  @ApiBearerAuth()
   @Get('')
   @ApiQuery({ name: 'limit', type: 'number', required: false, description: 'default 100'})
   @ApiQuery({ name: 'offset', type: 'number', required: false, description: 'default 0'})
-  async getAllProducts(@Query('limit') limit : number = 100, @Query('offset') offset: number = 0) : Promise<Pagination<ProductDto>> {
+  async getAllProducts(@Query('limit') limit : number = 100, @Query('offset') offset: number = 0, @Request() req) : Promise<Pagination<ProductDto>> {
     const [ data, total ] = await this.productRepository.findAndCount({
       order: { name: 1 },
       take: limit,
@@ -180,6 +183,72 @@ export class ProductController {
     }),
   )
   async importFile(@Body() body, @UploadedFile() file: Express.Multer.File, @Param("productType") productType: string) { 
+    try {
+      if (!file) {
+        throw new BadRequestException('invalid file provided, allowed *.csv single file');
+      }
+      // convert csv to json 
+      let data = await csv()
+        .fromString(file.buffer.toString())
+        .then(jsonObj=>jsonObj);
+
+      // save parent or children product to db
+      if ( productType === "PARENT" ) {
+        // TODO: check data.type before mapping.
+        let parentProducts = data.map(p => {
+          return {
+            "product_code": p.ID,
+            "SKU": p.SKU,
+            "name": p.Name,
+            "category": getProductCategory(p.Categories),
+          }
+        })
+        console.log(parentProducts);
+        return await this.productRepository.save(parentProducts);
+
+      } else if ( productType === "CHILDREN" ) {
+        let parentProductSKU = null;
+        let childrenProducts = data.map(p => {
+          let parentProduct = null;
+          if (parentProductSKU != p.parent) {
+            parentProductSKU = p.parent
+            parentProduct = this.productRepository.findOne({SKU: p.parent});
+            console.log(parentProduct)
+            if (!parentProduct) {
+              return;
+            }
+          }
+
+          return {
+            "product_code": p.ID,
+            "SKU": p.SKU,
+            "weight": parseFloat(p['Weight (g)']),
+            "length": p['Attribute 2 value(s)'] ? p['Attribute 2 value(s)'] : '',
+            "color": p['Attribute 3 value(s)'] ? p['Attribute 3 value(s)'] : '',
+            "workmanship": p['Regular price'],
+            "parent": parentProduct,
+            "purchase_date": moment().toISOString(),
+            "parentSKU": p.Parent
+          }
+        })
+
+        return await this.productVariationRepository.save(childrenProducts);
+      }
+
+      return data
+    } catch(err) {
+      throw err;
+    }
+  }
+
+  @Post('products/export/:productType')
+  @ApiOkResponse({ type: Array<Object> })
+  @UseInterceptors(
+    FileInterceptor('file', {
+      fileFilter: imageFileFilter,
+    }),
+  )
+  async exportFile(@Body() body, @UploadedFile() file: Express.Multer.File, @Param("productType") productType: string) { 
     try {
       if (!file) {
         throw new BadRequestException('invalid file provided, allowed *.csv single file');
