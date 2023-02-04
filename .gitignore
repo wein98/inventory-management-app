@@ -35,5 +35,6 @@ lerna-debug.log*
 !.vscode/extensions.json
 
 .env
+.env.devß
 ormconfig.js
 /horizon-ui-chakra
