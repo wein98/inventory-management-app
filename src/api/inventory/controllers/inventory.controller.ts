@@ -33,4 +33,21 @@ import { Repository } from "typeorm";
 
     // GET total weight by productId
 
+    // Decrease the stock count by product (variation) id 
+    @Post(':id/decrease')
+    async decreaseStock(@Param('id') id: number, @Body('amount') amount: number) {
+        const productVariation = await this.productVariationRepository.findOne(id) 
+        if (!productVariation) {
+            throw new NotFoundException('Product variation not found')
+        }
+          
+        // reduce the count by (amount) and save result
+        productVariation.stockCount -= amount;
+
+        // update updatedAt to current time 
+        // productVariation.updatedAt = new Date();
+        return this.productVariationRepository.save(productVariation)
+
+    }
+
   }
