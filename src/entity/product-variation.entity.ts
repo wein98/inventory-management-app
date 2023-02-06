@@ -19,6 +19,9 @@ export class ProductVariation {
   @Column({ default: '' })
   color: string;
 
+  @Column()
+  stockCount: number
+
   @Column({ unique: true, default: '', nullable: false })
   SKU: string;
 
