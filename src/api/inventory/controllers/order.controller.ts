@@ -22,6 +22,16 @@ import {
     constructor() {}
   
     // GET order by orderId
+    @Get(':orderId')
+    async getOrdersbyOrderId(@Param("orderId") orderId: string){
+      const orders = {}
+      console.log("Getting order...")
+      // TODO: actually retrieving from db
+      
+      return orders
+    }
+
+
 
     // POST order
   }
