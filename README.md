@@ -34,9 +34,19 @@ $ npm install
 
 ## Running the app
 
+Please ensure to store following variables into `.env` file. For development, please store into `.env.dev`.
+```
+DB_HOST=
+DB_USERNAME=
+DB_PASSWORD=
+DB_NAME=
+FIREBASE_API_KEY=
+FIREBASE_APP_ID=
+```
+
 ```bash
 # development
-$ npm run start
+$ npm run start:dev
 
 # watch mode
 $ npm run start:dev
