@@ -25,9 +25,6 @@ export class ProductVariation {
   @Column({ unique: true, nullable: false })
   product_code: string;
 
-  @Column()
-  purchase_date: Date;
-
   @Column({ default: 0 })
   workmanship: number;
 
