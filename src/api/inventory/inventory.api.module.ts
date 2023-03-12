@@ -4,7 +4,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { OrderController } from './controllers/order.controller';
 import { InventoryController } from './controllers/inventory.controller';
 import { PurchaseController } from './controllers/purchase.controller';
-import { Product, ProductVariation, Purchase, User } from 'src/entity';
+import { Product, ProductVariation, Purchase, User, Inventory } from 'src/entity';
 import { AuthController } from './controllers/auth.controller';
 import { AuthModule } from 'src/auth/auth.module';
 
@@ -13,7 +13,8 @@ import { AuthModule } from 'src/auth/auth.module';
     Product,
     ProductVariation,
     Purchase,
-    User
+    User, 
+    Inventory
   ]), AuthModule],
   controllers: [
     ProductController, 

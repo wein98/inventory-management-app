@@ -75,7 +75,7 @@ export class ProductController {
     where["SKU"] = Like(`%${productSKU}%`)
     const [ data, total ] = await this.productVariationRepository.findAndCount({
       where,
-      relations: ['parent'],
+      relations: ['parent', 'inventory'],
       order: { SKU: 1 },
       take: limit,
       skip: offset
