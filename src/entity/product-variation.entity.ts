@@ -1,6 +1,7 @@
 import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, OneToMany, OneToOne, JoinTable, JoinColumn, BeforeInsert, BeforeUpdate, ManyToOne } from 'typeorm';
 import { Purchase } from './purchase.entity';
 import { Product } from './product.entity';
+import { Inventory } from './inventory.entity';
 
 @Entity('product_variations')
 export class ProductVariation {
@@ -31,6 +32,11 @@ export class ProductVariation {
   @ManyToOne(() => Product,product => product.id)
   @JoinColumn({ name: "parent_id" })
   parent: Product; 
+
+
+  @OneToOne(() => Inventory, inventory => inventory) 
+  @JoinColumn()
+  inventory: Inventory;
 
   @CreateDateColumn()
   createdAt: Date;
