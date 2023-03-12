@@ -8,10 +8,9 @@ export class Inventory {
 
     // As per discussion to use SKU instead of production variation id
     @OneToOne(() => ProductVariation, product_variation => product_variation.SKU )
-    @JoinColumn({name: "SKU"})
     SKU: string
 
-    @Column()
+    @Column({default: 20})
     stockCount: number
 
     // When the product is first created
